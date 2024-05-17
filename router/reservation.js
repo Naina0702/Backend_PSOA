@@ -5,9 +5,9 @@ var string_qr = require('../config_db/requete');
 
 let query = new string_qr();
 
-router.get('/', function (req, res) {
+router.get('/liste', function (req, res) {
 
-    let qr = query.Afficher_tous("reservation");
+    let qr = `select *from reservation,membres,livres where (reservation.id_membres = membres.id_membres) and (reservation.id_livre = livres.id_livre);`;
 
     connection.query(qr, (err, result) => {
         if (err) {
@@ -23,19 +23,25 @@ router.get('/', function (req, res) {
     });
 });
 
+
 router.get('/max_id_reservation', function (req, res) {
 
     let qr = `SELECT max(id_resa)+1 as id from reservation`;
 
     connection.query(qr, (err, result) => {
-        if (err) {
+
+        if(err){
             console.log(err, 'errs');
         }
+        if(result[0].id == null) {
+           res.send({
+                id_resa:1
+            });
 
-        if (result.length > 0) {
-            res.send({
-                message: 'emprunts data',
-                data: result
+        }
+        else{
+           res.send({
+                id_resa:result[0].id
             });
         }
     });
@@ -71,12 +77,13 @@ router.post('/Ajout', function (req, res) {
         "id_resa",	
         "id_membres",	
         "id_livre",	
-        "date_reservation"	
+        "date_reservation",
+        "dispo_livre"	
         ];
 
-    var contenu = [req.body.id_resa,"'"+req.body.id_membres+"'","'"+req.body.id_livre+"'","'"+req.body.date_reservation+"'"];
+    var contenu = [req.body.id_resa,"'"+req.body.id_membres+"'","'"+req.body.id_livre+"'","'"+req.body.date_reservation+"'","'"+req.body.dispo_livre+"'"];
 
-    let etat_select = query.Afficher_avec_condition('reservation',`id_resa = '${req.body.id_resa}'`);
+    let etat_select = query.Afficher_avec_condition('reservation',`id_resa = ${req.body.id_resa}`);
 
     connection.query(etat_select,(err,result)=>{
         if(err){
@@ -89,7 +96,7 @@ router.post('/Ajout', function (req, res) {
             })
         }
         else{
-            let qr_insert = query.Inserer_donner_colonne("membres",NomColonne,contenu)
+            let qr_insert = query.Inserer_donner_colonne("reservation",NomColonne,contenu)
             connection.query(qr_insert,(err,result)=>{
                 if(err){
                     console.log(err);
@@ -97,7 +104,7 @@ router.post('/Ajout', function (req, res) {
                 if(result)
                 {
                     res.send({
-                        message:"Membre ajouter avec succes",
+                        message:"Réservation ajouté avec succes",
                         data:result
                     });
                     console.log(qr_insert);
@@ -115,11 +122,12 @@ router.post('/Ajout', function (req, res) {
     });
 });
 
-router.put('/update_emprunts',(req,res)=>{
 
-    let qr_update = `UPDATE reservation SET id_resa=${req.body.id_resa},id_membres='${req.body.id_membres}',id_livre='${req.body.id_livre}',date_reservation='${req.body.date_reservation}' WHERE id_resa = '${req.body.id_resa}'`;
+router.put('/update_reservation',(req,res)=>{
 
-    if(req.body.id_membres){
+    let qr_update = `UPDATE reservation SET id_resa=${req.body.id_resa},id_membres='${req.body.id_membres}',id_livre='${req.body.id_livre}',date_reservation='${req.body.date_reservation}',dispo_livre=${req.body.dispo_livre} WHERE id_resa = '${req.body.id_resa}'`;
+
+    if(!req.body.id_membres){
         return res.status(400).send({ error: true, message: "Identifiant resa Obligatoire" });
     }
 
@@ -133,9 +141,8 @@ router.put('/update_emprunts',(req,res)=>{
 
 });
 
-
-router.delete('/Delete_resa/:id_resa',(req,res)=>{
-    let im = req.params.id_livre;
+router.delete('/Delete_resa',(req,res)=>{
+    let im = req.body.id_resa;
 
     let qr_delete = `DELETE from reservation where id_resa = ${im}`;
 

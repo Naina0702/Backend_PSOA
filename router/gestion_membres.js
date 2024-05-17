@@ -109,12 +109,12 @@ router.post('/Ajout', function (req, res) {
     });
 });
 
-router.put('/update_livres',(req,res)=>{
+router.put('/update_membres',(req,res)=>{
 
 
-    let qr_update = `UPDATE membres SET id_membres='${req.body.id_membres}',nom='${req.body.titre}',prenoms='${req.body.prenoms}',email='${req.body.email}',adresse='${req.body.adresse}',telephone='${req.body.telephone}' WHERE id_membres = '${req.body.id_livre}'`;
+    let qr_update = `UPDATE membres SET nom='${req.body.nom}',prenoms='${req.body.prenoms}',email='${req.body.email}',adresse='${req.body.adresse}',telephone='${req.body.telephone}' WHERE id_membres = '${req.body.id_membres}'`;
 
-    if(req.body.id_membres){
+    if(!req.body.id_membres){
         return res.status(400).send({ error: true, message: "Identifiant membres Obligatoire" });
     }
 
@@ -129,8 +129,8 @@ router.put('/update_livres',(req,res)=>{
 });
 
 
-router.delete('/Delete_livre/:id_membres',(req,res)=>{
-    let im = req.params.id_livre;
+router.delete('/Delete_livre',(req,res)=>{
+    let im = req.body.id_membres;
 
     let qr_delete = `DELETE from membres where id_membres = '${im}'`;
 

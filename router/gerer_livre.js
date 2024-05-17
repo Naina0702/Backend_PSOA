@@ -149,17 +149,16 @@ router.post('/Ajout', function (req, res) {
     });
 });
 
-router.put('/update_livres/:id_livre',(req,res)=>{
+router.put('/update_livres',(req,res)=>{
 
-    var id_livres = req.params.id_livre;
+    let qr_update = `UPDATE livres SET titre="${req.body.titre}",auteur="${req.body.auteur}",exemplaire="${req.body.exemplaire}",exemplaire=${req.body.exemplaire},pochette="${req.body.pochette}" WHERE id_livre = '${req.body.id_livre}'`;
 
-    let qr_update = `UPDATE livres SET id_livre='${req.body.id_livre}',titre='${req.body.titre}',auteur='${req.body.auteur}',exemplaire='${req.body.exemplaire}',exemplaire=${req.body.exemplaire} WHERE id_livre = '${req.body.id_livre}'`;
-
-    if(!id_livres){
+    if(!req.body.id_livre){
         return res.status(400).send({ error: true, message: "Identifiant livre Obligatoire" });
     }
 
     connection.query(qr_update,function(error,results,fields){
+        console.log(qr_update)
         if(error) throw error;
 
         return res.send({
@@ -171,15 +170,18 @@ router.put('/update_livres/:id_livre',(req,res)=>{
 
 router.put('/update_exemplaire',(req,res)=>{
 
-    let qr_update = `UPDATE livres SET exemplaire=exemplaire-1 WHERE id_livre = '${req.body.id_livre}'`;
+    let qr_update = `UPDATE livres SET exemplaire=exemplaire${req.body.signe}1 WHERE id_livre = '${req.body.id_livre}'`;
 
     if(!req.body.id_livre){
         return res.status(400).send({ error: true, message: "Identifiant livre Obligatoire" });
     }
 
     connection.query(qr_update,function(error,results,fields){
-        if(error) throw error;
+        console.log(qr_update);
 
+        if(error) throw error;        
+         console.log(qr_update);
+        ;
         return res.send({
             message:'Exemplaire modifier avec succèes'
         });
@@ -189,10 +191,11 @@ router.put('/update_exemplaire',(req,res)=>{
 
 router.put('/Ajout_stock_livre',(req,res)=>{
 
-    let qr_update = `UPDATE livres SET exemplaire=exemplaire+${req.body.nombres} WHERE id_livre = '${req.body.id_livre}'`;
+    let qr_update = `UPDATE livres SET exemplaire=exemplaire${req.body.signe}${req.body.nombres} WHERE id_livre = '${req.body.id_livre}'`;
 
     if(!req.body.id_livre){
         return res.status(400).send({ error: true, message: "Identifiant livre Obligatoire" });
+    
     }
 
     connection.query(qr_update,function(error,results,fields){
@@ -206,8 +209,8 @@ router.put('/Ajout_stock_livre',(req,res)=>{
 });
 
 
-router.delete('/Delete_livre/:id_livre',(req,res)=>{
-    let im = req.params.id_livre;
+router.delete('/Delete_livre',(req,res)=>{
+    let im = req.body.id_livre;
 
     let qr_delete = `DELETE from livres where id_livre = '${im}'`;
 

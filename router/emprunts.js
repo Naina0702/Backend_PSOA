@@ -5,9 +5,9 @@ var string_qr = require('../config_db/requete');
 
 let query = new string_qr();
 
-router.get('/', function (req, res) {
+router.get('/all', function (req, res) {
 
-    let qr = query.Afficher_tous("emprunts");
+    let qr = `select *from emprunts,membres,livres where (emprunts.id_membres = membres.id_membres) and (emprunts.id_livre = livres.id_livre);`;
 
     connection.query(qr, (err, result) => {
         if (err) {
@@ -82,10 +82,10 @@ router.post('/Ajout', function (req, res) {
         "id_membres",
         "id_livre",
         "date_emprunt",
-        "date_retour"
         ];
 
-    var contenu = [req.body.id_emprunts,"'"+req.body.id_membres+"'","'"+req.body.id_livre+"'","'"+req.body.date_emprunt+"'","'"+req.body.date_retour+"'"];
+        
+    var contenu = [req.body.id_emprunts,"'"+req.body.id_membres+"'","'"+req.body.id_livre+"'","'"+req.body.date_emprunt+"'"];
 
     let etat_select = query.Afficher_avec_condition('emprunts',`id_emprunts = ${req.body.id_emprunts}`);
 
@@ -134,13 +134,15 @@ router.post('/Ajout', function (req, res) {
 router.put('/update_emprunts',(req,res)=>{
 
 
-    let qr_update = `UPDATE membres SET id_emprunts=${req.body.id_emprunts},id_membres='${req.body.id_membres}',id_livre='${req.body.id_livre}',date_emprunt='${req.body.date_emprunt}',date_retour='${req.body.date_retour}' WHERE id_emprunts = ${req.body.id_emprunts}`;
+    let qr_update = `UPDATE emprunts SET id_membres='${req.body.id_membres}',id_livre='${req.body.id_livre}',date_emprunt='${req.body.date_emprunt}',date_retour='${req.body.date_retour}' WHERE id_emprunts = ${req.body.id_emprunts}`;
 
-    if(req.body.id_membres){
+    if(!req.body.id_membres){
         return res.status(400).send({ error: true, message: "Identifiant emprunts Obligatoire" });
     }
 
     connection.query(qr_update,function(error,results,fields){
+
+        console.log(qr_update);
         if(error) throw error;
 
         return res.send({
@@ -151,8 +153,8 @@ router.put('/update_emprunts',(req,res)=>{
 });
 
 
-router.delete('/Delete_emprunts/:id_emprunts',(req,res)=>{
-    let im = req.params.id_livre;
+router.delete('/Delete_emprunts',(req,res)=>{
+    let im = req.body.id_emprunts;
 
     let qr_delete = `DELETE from emprunts where id_emprunts = ${im}`;
 
