@@ -151,7 +151,7 @@ router.post('/Ajout', function (req, res) {
 
 router.put('/update_livres',(req,res)=>{
 
-    let qr_update = `UPDATE livres SET titre="${req.body.titre}",auteur="${req.body.auteur}",exemplaire="${req.body.exemplaire}",exemplaire=${req.body.exemplaire},pochette="${req.body.pochette}" WHERE id_livre = '${req.body.id_livre}'`;
+    let qr_update = `UPDATE livres SET titre="${req.body.titre}",auteur="${req.body.auteur}",exemplaire=${req.body.exemplaire},categorie="${req.body.categorie}",pochette="${req.body.pochette}" WHERE id_livre = '${req.body.id_livre}'`;
 
     if(!req.body.id_livre){
         return res.status(400).send({ error: true, message: "Identifiant livre Obligatoire" });
@@ -207,7 +207,6 @@ router.put('/Ajout_stock_livre',(req,res)=>{
     });
 
 });
-
 
 router.delete('/Delete_livre',(req,res)=>{
     let im = req.body.id_livre;
